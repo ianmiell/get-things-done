@@ -1,0 +1,9 @@
+#!/bin/bash
+
+(
+	cd "${ROOT_FOLDER}" || exit
+	git log \
+		--oneline \
+		--patch \
+		"${TASKS_FOLDER}"
+)

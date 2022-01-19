@@ -1,0 +1,42 @@
+#!/bin/bash
+source ./gtd-call-check
+
+function usage {
+	echo ""
+	echo 'gtd remind TASKNO'
+	echo 'eg gtd remind 1234 "10 d"'
+	echo ""
+}
+
+set +u
+if [[ "${1}" == '' ]]
+then
+	usage
+	exit 1
+fi
+set -u
+
+readonly TASK_NO="${1}"
+
+echo 'Input number of days in future to remind'
+read -r DAYS_IN_FUTURE
+
+echo 'Regular repeat? (y/n)'
+read -r REGULAR_REPEAT
+
+assert_is_num "${TASK_NO}"
+assert_is_num "${DAYS_IN_FUTURE}"
+
+date -d "+${DAYS_IN_FUTURE} days" +%s > "${ROOT_FOLDER}/${TASKS_FOLDER}/${TASK_NO}/.remindme"
+if [[ "${REGULAR_REPEAT}" == 'y' ]]
+then
+	echo "${DAYS_IN_FUTURE}" > "${ROOT_FOLDER}/${TASKS_FOLDER}/${TASK_NO}/.repeat"
+else
+	echo 'Understood as "no", continuing'
+fi
+
+gtd move-status waiting "${TASK_NO}"
+
+(
+cd "${ROOT_FOLDER}" && git add .
+)
